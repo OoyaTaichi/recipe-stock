@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>料理ストック</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="app-header glassmorphism">
+        <h1>料理ストック</h1>
+        <button id="settings-btn" class="settings-btn" aria-label="設定">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </svg>
+        </button>
+    </header>
+
+    <main class="app-main">
+        <div class="filter-tabs">
+            <button class="tab-btn active" data-category="すべて">すべて</button>
+            <button class="tab-btn" data-category="肉料理">肉料理🍖</button>
+            <button class="tab-btn" data-category="魚料理">魚料理🐟</button>
+            <button class="tab-btn" data-category="副菜">副菜🥗</button>
+            <button class="tab-btn" data-category="汁物">汁物🍲</button>
+            <button class="tab-btn" data-category="麺類">麺類🍜</button>
+        </div>
+
+        <div class="filter-status-wrapper">
+            <select id="status-filter" class="status-select">
+                <option value="すべて">すべての分類</option>
+                <option value="作る候補">作る候補</option>
+                <option value="リピート料理">リピート料理</option>
+                <option value="当日作る料理">当日作る料理</option>
+                <option value="（作り置き専用）">（作り置き専用）</option>
+                <option value="△リピートなし料理">△リピートなし料理</option>
+            </select>
+            <div class="select-icon">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </div>
+        </div>
+
+        <div id="recipe-list" class="recipe-list">
+            <!-- レシピカードがここに追加されます -->
+        </div>
+
+        <div id="empty-state" class="empty-state hidden">
+            <div class="empty-icon">🍳</div>
+            <p>料理はまだありません。<br>右下の＋ボタンから追加しましょう！</p>
+        </div>
+    </main>
+
+    <button id="add-btn" class="fab-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+    </button>
+
+    <div id="add-modal" class="modal">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content bottom-sheet">
+            <div class="modal-header">
+                <h2 id="modal-title">新しい料理を登録</h2>
+                <button id="close-modal" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+            <form id="recipe-form">
+                <div class="form-group">
+                    <label for="recipe-name">料理名 <span class="required">*</span></label>
+                    <input type="text" id="recipe-name" required placeholder="例: 豚の生姜焼き">
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-category">大項目 <span class="required">*</span></label>
+                    <div class="select-wrapper">
+                        <select id="recipe-category" required>
+                            <option value="肉料理">肉料理</option>
+                            <option value="魚料理">魚料理</option>
+                            <option value="副菜">副菜</option>
+                            <option value="汁物">汁物</option>
+                            <option value="麺類">麺類</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-status">分類 <span class="required">*</span></label>
+                    <div class="select-wrapper">
+                        <select id="recipe-status" required>
+                            <option value="作る候補">作る候補</option>
+                            <option value="リピート料理">リピート料理</option>
+                            <option value="当日作る料理">当日作る料理</option>
+                            <option value="（作り置き専用）">（作り置き専用）</option>
+                            <option value="△リピートなし料理">△リピートなし料理</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-protein">たんぱく量目安 (g)</label>
+                    <input type="number" id="recipe-protein" placeholder="例: 20" min="0" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label>レシピURL (最大3つまで)</label>
+                    <input type="url" id="recipe-url1" placeholder="URL 1..." style="margin-bottom: 8px;">
+                    <input type="url" id="recipe-url2" placeholder="URL 2..." style="margin-bottom: 8px;">
+                    <input type="url" id="recipe-url3" placeholder="URL 3...">
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-memo">メモ (任意)</label>
+                    <textarea id="recipe-memo" rows="3" placeholder="美味しく作るコツなど..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">保存する</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 設定モーダル（データ引継ぎ用） -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-overlay" id="settings-overlay"></div>
+        <div class="modal-content bottom-sheet">
+            <div class="modal-header">
+                <h2>データのお引越し</h2>
+                <button id="close-settings" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="settings-section">
+                <p class="settings-desc">今の端末の料理データをファイルとして保存します（パソコン等から書き出す時に使います）。</p>
+                <button id="export-btn" class="submit-btn" style="background: var(--tag-shusai);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    データを書き出す
+                </button>
+            </div>
+
+            <div class="settings-section" style="margin-top: 24px;">
+                <p class="settings-desc">書き出したファイルを読み込みます（iPhone等にデータを入れる時に使います）。<br>※現在のデータに追加・結合されます。</p>
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+                <button id="import-btn" class="submit-btn" style="background: var(--tag-fukusai);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    データを読み込む
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 削除確認用のトースト通知 -->
+    <div id="toast" class="toast">操作が完了しました。</div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

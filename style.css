@@ -1,0 +1,616 @@
+:root {
+    --primary: #FF6B6B;
+    --primary-light: #FF8787;
+    --primary-dark: #FA5252;
+    --bg-color: #F8F9FA;
+    --surface: #FFFFFF;
+    --text-main: #212529;
+    --text-muted: #868E96;
+    --border: #DEE2E6;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    /* Tags Colors */
+    --tag-niku: #FF8787;
+    --tag-sakana: #4DABF7;
+    --tag-fukusai: #51CF66;
+    --tag-shirumono: #FCC419;
+    --tag-menrui: #FFA94D;
+    --tag-shusai: #4DABF7;
+    /* 互換性 */
+
+    /* Status Colors */
+    --status-1: #9775FA;
+    /* 作る候補 */
+    --status-2: #FF922B;
+    /* リピート料理 */
+    --status-3: #FF6B6B;
+    /* 当日作る料理 */
+    --status-4: #20C997;
+    /* 作り置き専用 */
+    --status-5: #CED4DA;
+    /* リピートなし */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #121212;
+        --surface: #1E1E1E;
+        --text-main: #F8F9FA;
+        --text-muted: #ADB5BD;
+        --border: #2C2C2C;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.5;
+    padding-bottom: 90px;
+    overflow-x: hidden;
+}
+
+/* Header */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.glassmorphism {
+    background: rgba(var(--bg-color), 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+@media (prefers-color-scheme: dark) {
+    .glassmorphism {
+        background: rgba(30, 30, 30, 0.8);
+    }
+}
+
+.app-header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+}
+
+/* Main */
+.app-main {
+    padding: 16px 20px;
+}
+
+/* Tabs */
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    scrollbar-width: none;
+}
+
+.filter-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: none;
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Select Filter */
+.filter-status-wrapper {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.status-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+.select-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-muted);
+}
+
+/* Recipe List */
+.recipe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Recipe Card */
+.recipe-card {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-md);
+    animation: fadeIn 0.4s ease forwards;
+    position: relative;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.recipe-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    word-break: break-all;
+}
+
+.recipe-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.badge-category {
+    background-color: var(--text-muted);
+}
+
+.badge-category[data-cat="肉料理"] {
+    background-color: var(--tag-niku);
+}
+
+.badge-category[data-cat="魚料理"] {
+    background-color: var(--tag-sakana);
+}
+
+.badge-category[data-cat="主菜"] {
+    background-color: var(--tag-shusai);
+}
+
+/* 互換性 */
+.badge-category[data-cat="副菜"] {
+    background-color: var(--tag-fukusai);
+}
+
+.badge-category[data-cat="汁物"] {
+    background-color: var(--tag-shirumono);
+}
+
+.badge-category[data-cat="麺類"] {
+    background-color: var(--tag-menrui);
+}
+
+.badge-status[data-stat="作る候補"] {
+    background-color: var(--status-1);
+}
+
+.badge-status[data-stat="リピート料理"] {
+    background-color: var(--status-2);
+}
+
+.badge-status[data-stat="当日作る料理"] {
+    background-color: var(--status-3);
+}
+
+.badge-status[data-stat="（作り置き専用）"] {
+    background-color: var(--status-4);
+}
+
+.badge-status[data-stat="△リピートなし料理"] {
+    background-color: var(--status-5);
+    color: var(--text-main);
+}
+
+/* 古いステータス用の互換性 */
+.badge-status[data-stat="これから作りたい料理"] {
+    background-color: var(--status-1);
+}
+
+.badge-status[data-stat="ﾘﾋﾟｰﾄ有り"] {
+    background-color: var(--status-2);
+}
+
+.badge-status[data-stat="当日作るもの"] {
+    background-color: var(--status-3);
+}
+
+.badge-status[data-stat="作り置き出来る"] {
+    background-color: var(--status-4);
+}
+
+.badge-status[data-stat="これからは作らない"] {
+    background-color: var(--status-5);
+    color: var(--text-main);
+}
+
+
+.recipe-urls-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.recipe-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.recipe-url svg {
+    flex-shrink: 0;
+}
+
+.recipe-url:active {
+    opacity: 0.7;
+}
+
+.recipe-protein {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.recipe-memo {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    white-space: pre-wrap;
+    border-left: 3px solid var(--border);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.delete-btn:active {
+    background: var(--bg-color);
+    color: var(--status-3);
+}
+
+.edit-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 4px;
+    margin-right: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.edit-btn:active {
+    background: var(--bg-color);
+    color: var(--primary);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+.empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* FAB */
+.fab-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: transform 0.2s ease;
+}
+
+.fab-btn:active {
+    transform: scale(0.95);
+    background: var(--primary-dark);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: none;
+}
+
+.modal.active {
+    pointer-events: auto;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.active .modal-overlay {
+    opacity: 1;
+}
+
+.modal-content.bottom-sheet {
+    position: relative;
+    width: 100%;
+    max-height: 90vh;
+    background: var(--surface);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 24px 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1);
+    overflow-y: auto;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.close-btn {
+    background: var(--bg-color);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.close-btn:active {
+    opacity: 0.7;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+.required {
+    color: var(--primary);
+}
+
+input[type="text"],
+input[type="url"],
+input[type="number"],
+textarea,
+.modal select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+.modal select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper::after {
+    content: "▼";
+    font-size: 0.7rem;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-muted);
+}
+
+.modal select {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 8px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+}
+
+.submit-btn:active {
+    background: var(--primary-dark);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-main);
+    color: var(--bg-color);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+}
+
+.toast.show {
+    top: 20px;
+    opacity: 1;
+}
+
+/* Settings */
+.settings-btn {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.settings-btn:active {
+    opacity: 0.7;
+}
+
+.settings-section {
+    background: var(--bg-color);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+
+.settings-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
