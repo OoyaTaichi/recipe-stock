@@ -162,14 +162,14 @@ body {
 .recipe-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
 }
 
 /* Recipe Card */
 .recipe-card {
     background: var(--surface);
     border-radius: var(--radius-md);
-    padding: 16px;
+    padding: 8px 10px;
     box-shadow: var(--shadow-md);
     animation: fadeIn 0.4s ease forwards;
     position: relative;
@@ -191,26 +191,27 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .recipe-title {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
     word-break: break-all;
+    line-height: 1.2;
 }
 
 .recipe-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 2px;
 }
 
 .badge {
-    padding: 4px 8px;
+    padding: 2px 4px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: white;
 }
@@ -291,21 +292,21 @@ body {
 .recipe-urls-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 4px;
+    margin-top: 4px;
 }
 
 .recipe-url {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
+    gap: 2px;
+    font-size: 0.75rem;
     color: var(--primary);
     text-decoration: none;
     font-weight: 600;
     background: rgba(255, 107, 107, 0.1);
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
 .recipe-url svg {
@@ -317,31 +318,32 @@ body {
 }
 
 .recipe-protein {
-    margin-top: 12px;
-    font-size: 0.9rem;
+    margin-top: 4px;
+    font-size: 0.75rem;
     color: var(--text-main);
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
 }
 
 .recipe-memo {
-    margin-top: 12px;
-    padding: 12px;
+    margin-top: 4px;
+    padding: 6px 8px;
     background: var(--bg-color);
-    border-radius: 8px;
-    font-size: 0.9rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
     color: var(--text-main);
     white-space: pre-wrap;
-    border-left: 3px solid var(--border);
+    border-left: 2px solid var(--border);
+    line-height: 1.2;
 }
 
 .delete-btn {
     background: none;
     border: none;
     color: var(--text-muted);
-    padding: 4px;
+    padding: 2px;
     cursor: pointer;
     border-radius: 4px;
 }
@@ -355,8 +357,8 @@ body {
     background: none;
     border: none;
     color: var(--text-muted);
-    padding: 4px;
-    margin-right: 4px;
+    padding: 2px;
+    margin-right: 2px;
     cursor: pointer;
     border-radius: 4px;
 }
