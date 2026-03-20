@@ -616,3 +616,130 @@ textarea:focus,
     color: var(--text-muted);
     margin-bottom: 12px;
 }
+
+/* ========== Photo Upload UI ========== */
+
+.add-photo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-color);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.add-photo-btn:active {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(255, 107, 107, 0.05);
+}
+
+.photo-preview-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.photo-preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.photo-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.photo-remove-btn:active {
+    background: var(--primary-dark);
+}
+
+/* ========== Recipe Card Photos ========== */
+
+.recipe-photos {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.recipe-photos::-webkit-scrollbar {
+    display: none;
+}
+
+.recipe-photo-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.recipe-photo-thumb:active {
+    transform: scale(0.95);
+}
+
+/* ========== Photo Lightbox ========== */
+
+.photo-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.photo-lightbox.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.photo-lightbox img {
+    max-width: 92%;
+    max-height: 85vh;
+    border-radius: 12px;
+    object-fit: contain;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
