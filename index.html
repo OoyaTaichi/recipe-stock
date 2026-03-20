@@ -118,10 +118,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label>レシピURL (最大3つまで)</label>
+                    <label>レシピURL (最大5つまで)</label>
                     <input type="url" id="recipe-url1" placeholder="URL 1..." style="margin-bottom: 8px;">
                     <input type="url" id="recipe-url2" placeholder="URL 2..." style="margin-bottom: 8px;">
-                    <input type="url" id="recipe-url3" placeholder="URL 3...">
+                    <input type="url" id="recipe-url3" placeholder="URL 3..." style="margin-bottom: 8px;">
+                    <input type="url" id="recipe-url4" placeholder="URL 4..." style="margin-bottom: 8px;">
+                    <input type="url" id="recipe-url5" placeholder="URL 5...">
                 </div>
 
                 <div class="form-group">
@@ -130,8 +132,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>📷 写真（最大3枚）</label>
-                    <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
+                    <label>📎 ファイル添付（最大5枚 / 写真・PDF・文書対応）</label>
+                    <input type="file" id="photo-input" accept="image/*,.heic,.heif,.png,.jpg,.jpeg,.gif,.webp,.bmp,.pdf,.doc,.docx,.txt,.xlsx,.xls" multiple style="display: none;">
                     <div id="photo-preview-container" class="photo-preview-container"></div>
                     <button type="button" id="add-photo-btn" class="add-photo-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
