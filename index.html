@@ -129,6 +129,20 @@
                     <textarea id="recipe-memo" rows="3" placeholder="美味しく作るコツなど..."></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label>📷 写真（最大3枚）</label>
+                    <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
+                    <div id="photo-preview-container" class="photo-preview-container"></div>
+                    <button type="button" id="add-photo-btn" class="add-photo-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        写真を追加
+                    </button>
+                </div>
+
                 <button type="submit" class="submit-btn">保存する</button>
             </form>
         </div>
@@ -176,11 +190,48 @@
                     データを読み込む
                 </button>
             </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0 8px;">
+            <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 16px;">📋 バックアップ出力</h3>
+
+            <div class="settings-section">
+                <p class="settings-desc">Excelで開けるCSV形式で出力します（料理名・大項目・分類・たんぱく量・URL・メモ）。</p>
+                <button id="export-csv-btn" class="submit-btn" style="background: #20C997;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    CSV（Excel用）で出力
+                </button>
+            </div>
+
+            <div class="settings-section" style="margin-top: 12px;">
+                <p class="settings-desc">読みやすいテキスト形式で出力します（印刷や共有に便利です）。</p>
+                <button id="export-txt-btn" class="submit-btn" style="background: #9775FA;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                    </svg>
+                    テキストファイルで出力
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- 削除確認用のトースト通知 -->
     <div id="toast" class="toast">操作が完了しました。</div>
+
+    <!-- 写真拡大表示用ライトボックス -->
+    <div id="photo-lightbox" class="photo-lightbox">
+        <img id="lightbox-img" src="" alt="拡大写真">
+    </div>
 
     <script src="app.js"></script>
 </body>
