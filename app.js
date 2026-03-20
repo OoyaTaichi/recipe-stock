@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Photo Event Listeners
     if (addPhotoBtn) {
         addPhotoBtn.addEventListener('click', () => {
-            if (currentPhotos.length >= 3) {
-                showToast('写真は最大3枚までです');
+            if (currentPhotos.length >= 5) {
+                showToast('ファイルは最大5つまでです');
                 return;
             }
             photoInput.click();
@@ -61,6 +61,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lightbox) {
         lightbox.addEventListener('click', () => {
             lightbox.classList.remove('active');
+        });
+    }
+
+    // サムネイルとファイルクリックのイベントデリゲーション
+    if (recipeList) {
+        recipeList.addEventListener('click', function (e) {
+            const thumb = e.target.closest('.recipe-photo-thumb');
+            if (thumb) {
+                openLightbox(thumb.src);
+            }
+            const fileThumb = e.target.closest('.recipe-file-thumb');
+            if (fileThumb) {
+                const src = fileThumb.dataset.src;
+                const a = document.createElement('a');
+                a.href = src;
+                a.download = fileThumb.title || 'downloaded_file';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         });
     }
 
@@ -205,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const header = ['料理名', '大項目', '分類', 'たんぱく量(g)', 'URL1', 'URL2', 'URL3', 'メモ', '登録日'];
+        const header = ['料理名', '大項目', '分類', 'たんぱく量(g)', 'URL1', 'URL2', 'URL3', 'URL4', 'URL5', 'メモ', '登録日'];
         const rows = recipes.map(r => {
             const urls = r.urls || (r.url ? [r.url] : []);
             const createdDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ja-JP') : '';
@@ -217,6 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 csvEscape(urls[0] || ''),
                 csvEscape(urls[1] || ''),
                 csvEscape(urls[2] || ''),
+                csvEscape(urls[3] || ''),
+                csvEscape(urls[4] || ''),
                 csvEscape(r.memo || ''),
                 csvEscape(createdDate)
             ].join(',');
@@ -358,24 +380,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
 
-        const remaining = 3 - currentPhotos.length;
+        const remaining = 5 - currentPhotos.length;
         if (remaining <= 0) {
-            showToast('写真は最大3枚までです');
+            showToast('ファイルは最大5つまでです');
             photoInput.value = '';
             return;
         }
 
         const filesToProcess = files.slice(0, remaining);
         if (files.length > remaining) {
-            showToast(`${remaining}枚まで追加できます`);
+            showToast(`あと${remaining}つまで追加できます`);
         }
 
         for (const file of filesToProcess) {
             try {
-                const base64 = await compressImage(file);
-                currentPhotos.push(base64);
+                if (file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name)) {
+                    // 画像ファイルは圧縮して保存
+                    const base64 = await compressImage(file);
+                    currentPhotos.push({ type: 'image', data: base64, name: file.name });
+                } else {
+                    // PDF・文書等はそのままBase64で保存（500KB以下）
+                    if (file.size > 500 * 1024) {
+                        showToast(`${file.name} は500KBを超えています`);
+                        continue;
+                    }
+                    const base64 = await readFileAsDataURL(file);
+                    currentPhotos.push({ type: 'file', data: base64, name: file.name });
+                }
             } catch (err) {
-                console.error('画像の圧縮に失敗:', err);
+                console.error('ファイルの読み込みに失敗:', err);
             }
         }
 
@@ -383,17 +416,46 @@ document.addEventListener('DOMContentLoaded', () => {
         photoInput.value = '';
     }
 
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function getFileIcon(name) {
+        const ext = (name || '').split('.').pop().toLowerCase();
+        if (ext === 'pdf') return '📄';
+        if (['doc', 'docx'].includes(ext)) return '🗒️';
+        if (['xls', 'xlsx'].includes(ext)) return '📊';
+        if (ext === 'txt') return '📝';
+        return '📁';
+    }
+
     function renderPhotoPreview() {
         if (!photoPreviewContainer) return;
         photoPreviewContainer.innerHTML = '';
 
-        currentPhotos.forEach((dataUrl, index) => {
+        currentPhotos.forEach((photo, index) => {
             const item = document.createElement('div');
             item.className = 'photo-preview-item';
-            item.innerHTML = `
-                <img src="${dataUrl}" alt="写真${index + 1}">
-                <button type="button" class="photo-remove-btn" data-index="${index}">&times;</button>
-            `;
+
+            // 旧形式（文字列）との互換性
+            const photoObj = typeof photo === 'string' ? { type: 'image', data: photo, name: '' } : photo;
+
+            if (photoObj.type === 'image') {
+                item.innerHTML = `
+                    <img src="${photoObj.data}" alt="写真${index + 1}">
+                    <button type="button" class="photo-remove-btn" data-index="${index}">&times;</button>
+                `;
+            } else {
+                item.innerHTML = `
+                    <div class="file-icon-preview">${getFileIcon(photoObj.name)}<span class="file-name-preview">${photoObj.name.length > 6 ? photoObj.name.substring(0, 6) + '...' : photoObj.name}</span></div>
+                    <button type="button" class="photo-remove-btn" data-index="${index}">&times;</button>
+                `;
+            }
             photoPreviewContainer.appendChild(item);
         });
 
@@ -406,9 +468,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // 3枚に達したらボタンを非表示
+        // 5つに達したらボタンを非表示
         if (addPhotoBtn) {
-            addPhotoBtn.style.display = currentPhotos.length >= 3 ? 'none' : '';
+            addPhotoBtn.style.display = currentPhotos.length >= 5 ? 'none' : '';
         }
     }
 
@@ -430,6 +492,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const url1 = document.getElementById('recipe-url1').value.trim();
         const url2 = document.getElementById('recipe-url2').value.trim();
         const url3 = document.getElementById('recipe-url3').value.trim();
+        const url4 = document.getElementById('recipe-url4').value.trim();
+        const url5 = document.getElementById('recipe-url5').value.trim();
         const memo = document.getElementById('recipe-memo').value.trim();
 
         if (!title) return;
@@ -444,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     category,
                     status,
                     protein,
-                    urls: [url1, url2, url3].filter(u => u !== ""),
+                    urls: [url1, url2, url3, url4, url5].filter(u => u !== ""),
                     memo,
                     photos: [...currentPhotos]
                 };
@@ -499,6 +563,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('recipe-url1').value = (recipe.urls && recipe.urls[0]) ? recipe.urls[0] : (recipe.url || '');
         document.getElementById('recipe-url2').value = (recipe.urls && recipe.urls[1]) ? recipe.urls[1] : '';
         document.getElementById('recipe-url3').value = (recipe.urls && recipe.urls[2]) ? recipe.urls[2] : '';
+        document.getElementById('recipe-url4').value = (recipe.urls && recipe.urls[3]) ? recipe.urls[3] : '';
+        document.getElementById('recipe-url5').value = (recipe.urls && recipe.urls[4]) ? recipe.urls[4] : '';
         document.getElementById('recipe-memo').value = recipe.memo || '';
 
         // 既存の写真を復元
@@ -563,12 +629,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     urlsHtml += '</div>';
                 }
 
-                // 写真サムネイルの表示
+                // 写真・ファイルサムネイルの表示
                 let photosHtml = '';
                 if (r.photos && r.photos.length > 0) {
                     photosHtml = '<div class="recipe-photos">';
-                    r.photos.forEach(photoSrc => {
-                        photosHtml += `<img src="${photoSrc}" class="recipe-photo-thumb" alt="料理写真">`;
+                    r.photos.forEach(photo => {
+                        const photoObj = typeof photo === 'string' ? { type: 'image', data: photo, name: '' } : photo;
+                        if (photoObj.type === 'image') {
+                            photosHtml += `<img src="${photoObj.data}" class="recipe-photo-thumb" alt="料理写真">`;
+                        } else {
+                            photosHtml += `<div class="recipe-file-thumb" data-src="${photoObj.data}" title="${photoObj.name}">${getFileIcon(photoObj.name)}<span class="file-thumb-name">${photoObj.name.length > 5 ? photoObj.name.substring(0, 5) + '..' : photoObj.name}</span></div>`;
+                        }
                     });
                     photosHtml += '</div>';
                 }
@@ -618,13 +689,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 recipeList.appendChild(card);
             });
         }
-
-        // サムネイルクリックのイベントデリゲーション
-        recipeList.addEventListener('click', function (e) {
-            const thumb = e.target.closest('.recipe-photo-thumb');
-            if (thumb) {
-                openLightbox(thumb.src);
-            }
-        });
     }
 });
