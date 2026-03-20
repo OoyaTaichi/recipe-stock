@@ -90,8 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = fileThumb.title || 'downloaded_file';
-                    a.target = '_blank'; // iPhoneの場合は別タブで開く挙動になることが多い
+                    a.target = '_blank'; // iPhone・PCともに別タブでプレビューを試みる
+                    
+                    // PDFの場合はブラウザの標準ビューアで「見る」ためにダウンロード属性を外す
+                    if (!mime.includes('pdf')) {
+                        a.download = fileThumb.title || 'downloaded_file';
+                    }
+                    
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
