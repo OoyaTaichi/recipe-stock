@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilter = document.getElementById('status-filter');
     const toast = document.getElementById('toast');
 
+    // Photo Elements
+    const photoInput = document.getElementById('photo-input');
+    const addPhotoBtn = document.getElementById('add-photo-btn');
+    const photoPreviewContainer = document.getElementById('photo-preview-container');
+    const lightbox = document.getElementById('photo-lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+
     // Settings & Import/Export Elements
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -25,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCategory = 'すべて';
     let currentStatus = 'すべて';
     let editingId = null; // 編集中の料理IDを保持
+    let currentPhotos = []; // 現在フォームに添付されている写真(Base64)の配列
 
     // Initialize
     loadRecipes();
@@ -34,6 +42,27 @@ document.addEventListener('DOMContentLoaded', () => {
     addBtn.addEventListener('click', openModal);
     closeModalBtn.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', closeModal);
+
+    // Photo Event Listeners
+    if (addPhotoBtn) {
+        addPhotoBtn.addEventListener('click', () => {
+            if (currentPhotos.length >= 3) {
+                showToast('写真は最大3枚までです');
+                return;
+            }
+            photoInput.click();
+        });
+    }
+
+    if (photoInput) {
+        photoInput.addEventListener('change', handlePhotoSelect);
+    }
+
+    if (lightbox) {
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+    }
 
     // Settings Event Listeners
     if (settingsBtn) {
@@ -58,6 +87,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (importBtn && importFile) {
         importBtn.addEventListener('click', () => importFile.click());
         importFile.addEventListener('change', importData);
+    }
+
+    // CSV / Text Export Event Listeners
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+    const exportTxtBtn = document.getElementById('export-txt-btn');
+
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', exportCSV);
+    }
+    if (exportTxtBtn) {
+        exportTxtBtn.addEventListener('click', exportText);
     }
 
     recipeForm.addEventListener('submit', (e) => {
@@ -106,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
         recipeForm.reset();
         editingId = null;
+        currentPhotos = [];
+        renderPhotoPreview();
         const modalTitle = document.getElementById('modal-title');
         if (modalTitle) modalTitle.textContent = '新しい料理を登録';
     }
@@ -140,6 +182,104 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
 
         showToast('データを書き出しました。');
+        closeSettingsModal();
+    }
+
+    function getDateStr() {
+        const date = new Date();
+        return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function csvEscape(val) {
+        if (val == null) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    }
+
+    function exportCSV() {
+        if (recipes.length === 0) {
+            showToast('出力するデータがありません');
+            return;
+        }
+
+        const header = ['料理名', '大項目', '分類', 'たんぱく量(g)', 'URL1', 'URL2', 'URL3', 'メモ', '登録日'];
+        const rows = recipes.map(r => {
+            const urls = r.urls || (r.url ? [r.url] : []);
+            const createdDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ja-JP') : '';
+            return [
+                csvEscape(r.title),
+                csvEscape(r.category),
+                csvEscape(r.status),
+                csvEscape(r.protein || ''),
+                csvEscape(urls[0] || ''),
+                csvEscape(urls[1] || ''),
+                csvEscape(urls[2] || ''),
+                csvEscape(r.memo || ''),
+                csvEscape(createdDate)
+            ].join(',');
+        });
+
+        // BOM付きUTF-8でExcelの文字化けを防止
+        const bom = '\uFEFF';
+        const csvContent = bom + header.join(',') + '\n' + rows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `料理ストック-${getDateStr()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('CSVを出力しました');
+        closeSettingsModal();
+    }
+
+    function exportText() {
+        if (recipes.length === 0) {
+            showToast('出力するデータがありません');
+            return;
+        }
+
+        let text = '=== 料理ストック データ一覧 ===\n';
+        text += `出力日: ${new Date().toLocaleDateString('ja-JP')}\n`;
+        text += `登録数: ${recipes.length}件\n`;
+        text += '\n' + '='.repeat(40) + '\n\n';
+
+        recipes.forEach((r, i) => {
+            const urls = r.urls || (r.url ? [r.url] : []);
+            const createdDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ja-JP') : '不明';
+
+            text += `[▄ ${i + 1}] ${r.title}\n`;
+            text += `  大項目: ${r.category || '-'}\n`;
+            text += `  分類  : ${r.status || '-'}\n`;
+            if (r.protein) text += `  たんぱく量: ${r.protein}g\n`;
+            if (urls.length > 0) {
+                urls.forEach((u, idx) => {
+                    text += `  URL${idx + 1} : ${u}\n`;
+                });
+            }
+            if (r.memo) text += `  メモ  : ${r.memo}\n`;
+            if (r.photos && r.photos.length > 0) text += `  写真  : ${r.photos.length}枚添付\n`;
+            text += `  登録日: ${createdDate}\n`;
+            text += '-'.repeat(40) + '\n';
+        });
+
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `料理ストック-${getDateStr()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('テキストを出力しました');
         closeSettingsModal();
     }
 
@@ -181,6 +321,107 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     }
 
+    // ========== Photo Functions ==========
+
+    function compressImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                    resolve(dataUrl);
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function handlePhotoSelect(e) {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+
+        const remaining = 3 - currentPhotos.length;
+        if (remaining <= 0) {
+            showToast('写真は最大3枚までです');
+            photoInput.value = '';
+            return;
+        }
+
+        const filesToProcess = files.slice(0, remaining);
+        if (files.length > remaining) {
+            showToast(`${remaining}枚まで追加できます`);
+        }
+
+        for (const file of filesToProcess) {
+            try {
+                const base64 = await compressImage(file);
+                currentPhotos.push(base64);
+            } catch (err) {
+                console.error('画像の圧縮に失敗:', err);
+            }
+        }
+
+        renderPhotoPreview();
+        photoInput.value = '';
+    }
+
+    function renderPhotoPreview() {
+        if (!photoPreviewContainer) return;
+        photoPreviewContainer.innerHTML = '';
+
+        currentPhotos.forEach((dataUrl, index) => {
+            const item = document.createElement('div');
+            item.className = 'photo-preview-item';
+            item.innerHTML = `
+                <img src="${dataUrl}" alt="写真${index + 1}">
+                <button type="button" class="photo-remove-btn" data-index="${index}">&times;</button>
+            `;
+            photoPreviewContainer.appendChild(item);
+        });
+
+        // 削除ボタンのイベント
+        photoPreviewContainer.querySelectorAll('.photo-remove-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.index);
+                currentPhotos.splice(idx, 1);
+                renderPhotoPreview();
+            });
+        });
+
+        // 3枚に達したらボタンを非表示
+        if (addPhotoBtn) {
+            addPhotoBtn.style.display = currentPhotos.length >= 3 ? 'none' : '';
+        }
+    }
+
+    // ライトボックスで写真を拡大表示
+    window.openLightbox = function (src) {
+        if (lightbox && lightboxImg) {
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+        }
+    }
+
+    // ========== Save Recipe ==========
+
     function saveRecipe() {
         const title = document.getElementById('recipe-name').value.trim();
         const category = document.getElementById('recipe-category').value;
@@ -204,7 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     status,
                     protein,
                     urls: [url1, url2, url3].filter(u => u !== ""),
-                    memo
+                    memo,
+                    photos: [...currentPhotos]
                 };
             }
             editingId = null;
@@ -221,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 protein,
                 urls: [url1, url2, url3].filter(u => u !== ""),
                 memo,
+                photos: [...currentPhotos],
                 createdAt: new Date().toISOString()
             };
             recipes.unshift(newRecipe);
@@ -257,6 +500,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('recipe-url2').value = (recipe.urls && recipe.urls[1]) ? recipe.urls[1] : '';
         document.getElementById('recipe-url3').value = (recipe.urls && recipe.urls[2]) ? recipe.urls[2] : '';
         document.getElementById('recipe-memo').value = recipe.memo || '';
+
+        // 既存の写真を復元
+        currentPhotos = recipe.photos ? [...recipe.photos] : [];
+        renderPhotoPreview();
 
         openModal();
     }
@@ -316,6 +563,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     urlsHtml += '</div>';
                 }
 
+                // 写真サムネイルの表示
+                let photosHtml = '';
+                if (r.photos && r.photos.length > 0) {
+                    photosHtml = '<div class="recipe-photos">';
+                    r.photos.forEach(photoSrc => {
+                        photosHtml += `<img src="${photoSrc}" class="recipe-photo-thumb" alt="料理写真">`;
+                    });
+                    photosHtml += '</div>';
+                }
+
                 let proteinHtml = '';
                 if (r.protein) {
                     proteinHtml = `<div class="recipe-protein">💪 たんぱく量目安: ${r.protein}g</div>`;
@@ -355,10 +612,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             </button>
                         </div>
                     </div>
+                    ${photosHtml}
                     ${memoHtml}
                 `;
                 recipeList.appendChild(card);
             });
         }
+
+        // サムネイルクリックのイベントデリゲーション
+        recipeList.addEventListener('click', function (e) {
+            const thumb = e.target.closest('.recipe-photo-thumb');
+            if (thumb) {
+                openLightbox(thumb.src);
+            }
+        });
     }
 });
